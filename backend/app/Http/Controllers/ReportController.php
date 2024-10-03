@@ -2,28 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
+use App\Models\Report;
 use Illuminate\Http\Request;
 
-class StudentController extends Controller
+class ReportController extends Controller
 {
-    protected $student;
+    protected $report;
 
-    public function __construct(Student $student)
+    public function __construct(Report $report)
     {
-        $this->student = $student;
+        $this->report = $report;
     }
-
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $students = $this->student->all();
+        $reports = $this->report->all();
+
+        if (count($reports) > 0) return response()->json([
+            "message" => "data retrieved successfully",
+            "data" => $reports
+        ]);
         return response()->json([
             "message" => "data retrieved successfully",
-            "data" => $students
-        ], $students->isEmpty() ? 204 : 200);
+            "data" => []
+        ], 201);
     }
 
     /**
@@ -39,7 +43,12 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate(["student_nis" => "required"]);
+        $report = new $this->report();
+        $report->student_nis = $request->student_nis;
+        $report->description = $request->description;
+        $report->date = now();
+        $report->save();
     }
 
     /**
@@ -72,5 +81,10 @@ class StudentController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getReportByClass(string $id)
+    {
+        $report = $this->report->where('class_id', $id)->get();
     }
 }

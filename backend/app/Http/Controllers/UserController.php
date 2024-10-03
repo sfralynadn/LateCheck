@@ -8,7 +8,7 @@ class UserController extends Controller
 {
     public function authenticate(Request $request)
     {
-        $credentials = $request()->only(["email", "password"]);
+        $credentials = $request->only(["email", "password"]);
         $token = auth()->guard("api")->attempt($credentials);
 
         if (!$token) return response()->json([
@@ -20,6 +20,6 @@ class UserController extends Controller
             "data" => [
                 "access_token" => $token
             ]
-        ], 401);
+        ], 200);
     }
 }
