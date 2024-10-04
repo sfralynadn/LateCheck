@@ -9,8 +9,8 @@ class Student extends Model
 {
     use HasFactory;
 
-    public function className()
+    public function classroom()
     {
-        return $this->belongsTo(Classes::class);
+        return $this->belongsTo(Classroom::class);
     }
 }

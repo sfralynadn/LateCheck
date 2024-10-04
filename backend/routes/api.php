@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,10 +20,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix("auth")->group(function () {
-    Route::post("login", [UserController::class, "authenticate"]);
+Route::group(['prefix' => 'auth', 'middleware' => 'api'], function () {
+    Route::post('login', [AuthController::class, 'authenticate']);
+    Route::get('me', [AuthController::class, 'getCurrentUser']);
 });
 
-Route::middleware("jwt")->group(function () {
-    Route::resource("student", StudentController::class);
+Route::group(['middleware' => ['api', 'jwt.verify']], function () {
+    Route::apiResources([
+        'report' => ReportController::class
+    ]);
 });

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->char("student_nis", 6)->index();
-            $table->foreign("student_nis")->references("nis")->on("students")->onDelete("cascade");
+            $table->bigInteger("student_id")->unsigned()->index();
+            $table->foreign("student_id")->references("id")->on("students")->onDelete("cascade");
             $table->string("description")->nullable();
-            $table->date("day");
+            $table->date("date");
             $table->timestamps();
         });
     }

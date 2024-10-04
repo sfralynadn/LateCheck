@@ -20,8 +20,9 @@ class StudentFactory extends Factory
             'nis' => fake()->randomNumber(5),
             'name' => fake()->name(),
             'gender' => fake()->randomElement(["W", "M"]),
-            'contact' => fake()->numberBetween(100000000000, 999999999999),
-            'class_id' => fake()->randomElement([1, 2, 3])
+            'contact' => fake()->numerify("############"),
+            'classroom_id' => fake()->randomElement([1, 2, 3]),
+            'address' => fake()->address(),
         ];
     }
 }
