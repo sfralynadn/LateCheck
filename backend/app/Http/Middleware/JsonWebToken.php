@@ -21,11 +21,20 @@ class JsonWebToken
             JWTAuth::parseToken()->authenticate();
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json(['status' => 'Token is Invalid']);
+                return response()->json([
+                    'error' => 'unauthorized user',
+                    'message' => 'invalid token'
+                ], 401);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json(['status' => 'Token is Expired']);
+                return response()->json([
+                    'error' => 'unauthorized user',
+                    'message' => 'token is expired'
+                ], 401);
             } else {
-                return response()->json(['status' => 'Authorization Token not found']);
+                return response()->json([
+                    'error' => 'unauthorized user',
+                    'message' => 'authorization token not found'
+                ], 401);
             }
         }
         return $next($request);

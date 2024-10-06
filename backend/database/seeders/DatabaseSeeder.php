@@ -13,9 +13,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // \App\Models\User::factory(10)->create();
-        \App\Models\Classroom::factory(3)->create();
-        \App\Models\Teacher::factory(3)->create();
-        \App\Models\Student::factory(10)->create();
+        for ($i = 0; $i < 3; $i++):
+            \App\Models\Classroom::factory()
+                ->has(\App\Models\Teacher::factory()->count(1))
+                ->has(\App\Models\Student::factory()->has(\App\Models\Report::factory()->count(fake()->numberBetween(1, 5)), 'reports')->count(30), 'students')
+                ->create();
+        endfor;
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',

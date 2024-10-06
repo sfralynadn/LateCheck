@@ -20,6 +20,7 @@ class Teacher extends Authenticatable implements JWTSubject
 
     protected $hidden = [
         'password',
+        'contact'
     ];
 
     protected $casts = [
@@ -34,5 +35,10 @@ class Teacher extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
     }
 }
