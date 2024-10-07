@@ -12,14 +12,13 @@ const AuthContext = createContext<iContext | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data, isLoading } = useQuery({
-    initialData: null,
     queryKey: ["auth"],
     queryFn: async () => {
       try {
         const response = await api.get("/auth/me");
-        if (response.status == 200) return response.data;
+        if (response.status == 200) return response.data.data;
         else return null;
-      } catch (err) {
+      } catch {
         return null;
       }
     },
@@ -38,3 +37,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

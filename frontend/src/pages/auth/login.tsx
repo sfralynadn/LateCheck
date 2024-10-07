@@ -4,10 +4,11 @@ import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/utils/api/api";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import { Token } from "@/types/token";
 
 type Fields = {
   email: string;
@@ -15,6 +16,7 @@ type Fields = {
 };
 
 export default function SignInPage() {
+  const queryClient = useQueryClient();
   const form = useForm<Fields>({
     defaultValues: {
       email: "",
@@ -26,7 +28,7 @@ export default function SignInPage() {
     mutationFn: async (data: Fields) => {
       try {
         const res = await api.post("/auth/login", data);
-        if (res.status == 200) return res.data;
+        if (res.status == 200) return res.data.data;
       } catch (err: any) {
         if (err instanceof AxiosError && err.response && err.response.data) {
           throw new Error(err.response.data.message);
@@ -34,7 +36,10 @@ export default function SignInPage() {
         throw new Error(err.message);
       }
     },
-    onSuccess: (data) => console.log(data),
+    onSuccess: (data: Token) => {
+      localStorage.setItem("accessToken", data.access_token);
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -78,8 +83,12 @@ export default function SignInPage() {
                   render={({ field }) => <PasswordInput {...field} />}
                 />
               </div>
-              <Button type="submit" className="w-full mt-1">
-                Sign In
+              <Button
+                disabled={isPending}
+                type="submit"
+                className="w-full mt-1 disabled:bg-muted-foreground"
+              >
+                {isPending ? "Loading.." : "Sign In"}
               </Button>
             </form>
           </Form>

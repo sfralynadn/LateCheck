@@ -22,6 +22,7 @@ class PaginationResource extends JsonResource
             'per_page' => $this->perPage(),
             'next_page_url' => $this->nextPageUrl(),
             'prev_page_url' => $this->previousPageUrl(),
+            'last_page' => $this->lastPage()
         ];
     }
 }

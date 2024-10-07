@@ -37,7 +37,6 @@ class ReportController extends Controller
             ->when($date, function ($query) use ($date) {
                 $query->whereDate('date', '<=', Carbon::parse($date)->format('Y-m-d'));
             })->orderBy('date', 'DESC')->paginate();
-
         return response()->json([
             'message' => 'data successfully retrieved',
             'data' => ReportResource::collection($report->items()),

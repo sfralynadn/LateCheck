@@ -23,8 +23,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import clsx from "clsx";
+import useAuth from "@/hooks/use_auth";
+import api from "@/utils/api/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 const menus: {
   name: string;
@@ -42,23 +45,35 @@ const menus: {
     name: "Classes",
     link: "/class",
     icon: <Shapes />,
-    active: (pathname: string) => pathname.includes("/class"),
+    active: (pathname: string) => pathname.includes("class"),
   },
   {
-    name: "Analytics",
-    link: "/analytic",
+    name: "Report",
+    link: "/report",
     icon: <LineChart />,
-    active: (pathname: string) => pathname.includes("/analytic"),
+    active: (pathname: string) => pathname.includes("report"),
   },
   {
     name: "Other Menu",
     link: "/other",
     icon: <CircleHelp />,
-    active: (pathname: string) => pathname.includes("/other"),
+    active: (pathname: string) => pathname.includes("other"),
   },
 ];
 
 export default function Wrapper({ children }: { children: ReactNode }) {
+  const { auth } = useAuth();
+  const queryClient = useQueryClient();
+  const logout = async () => {
+    try {
+      const res = await api.post("auth/logout");
+      if (res.status == 200) {
+        await queryClient.invalidateQueries({ queryKey: ["auth"] });
+      }
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  };
   const { pathname } = useLocation();
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -120,7 +135,10 @@ export default function Wrapper({ children }: { children: ReactNode }) {
                   <Link
                     key={i}
                     to={menu.link}
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                    className={clsx(
+                      "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground",
+                      !menu.active(pathname) && "text-muted-foreground",
+                    )}
                   >
                     <span className="*:h-5 *:w-5">{menu.icon}</span>
                     {menu.name}
@@ -150,12 +168,14 @@ export default function Wrapper({ children }: { children: ReactNode }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{auth?.name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
+              {/* <DropdownMenuItem>Support</DropdownMenuItem> */}
+              {/* <DropdownMenuSeparator /> */}
+              <DropdownMenuItem onClick={() => logout()}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

@@ -36,18 +36,27 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function Chart({ className }: { className: string }) {
+export function Chart({
+  className,
+  items,
+}: {
+  className: string;
+  items?: typeof chartData;
+}) {
+  const data = items || chartData;
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>Bar Chart - Late Students</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardDescription>
+          {data[0].month} - {data[data.length - 1].month} 2024
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={data}
             margin={{
               top: 20,
             }}
@@ -77,7 +86,8 @@ export function Chart({ className }: { className: string }) {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Total Students : {data.reduce((acc, val) => acc + val.desktop, 0)}{" "}
+          <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total late students for the last 6 months
