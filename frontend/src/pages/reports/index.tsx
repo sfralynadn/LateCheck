@@ -1,15 +1,22 @@
 import * as React from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import moment from "moment";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import api from "@/utils/api/api";
+import { Report } from "@/types/report";
+import { Pagination } from "@/types/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import useModal from "@/hooks/use_modal";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
 import {
   Pagination as PaginationWrapper,
   PaginationContent,
@@ -19,7 +26,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
 import {
   Table,
   TableBody,
@@ -29,17 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import moment from "moment";
-import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import api from "@/utils/api/api";
-import { Response } from "@/types/response";
-import { Report } from "@/types/report";
-import { Pagination } from "@/types/pagination";
-import { Skeleton } from "@/components/ui/skeleton";
-import useModal from "@/hooks/use_modal";
+import { Select } from "@/components/custom/select/select";
 
 const formatPaginationUrl = (url: string) => Number(url.split("page=")[1]);
 
@@ -47,6 +43,7 @@ export default function AnalyticPage() {
   const { isShow, toggle } = useModal();
   const [date, setDate] = React.useState<Date>();
   const [page, setPage] = useState(1);
+  const [classroom, setClassroom] = useState(null);
   const [pagination, setPagination] = useState<Pagination>({
     next_page_url: null,
     prev_page_url: null,
@@ -57,11 +54,26 @@ export default function AnalyticPage() {
     total: 0,
     per_page: 0,
   });
-  const { data: result, isLoading } = useQuery<Report[]>({
+
+  const { data: classrooms } = useQuery({
+    queryKey: ["classrooms"],
+    queryFn: async () => {
+      const res = await api.get("classroom");
+      return res.data.data;
+    },
+  });
+
+  const {
+    data: result,
+    isLoading,
+    refetch,
+  } = useQuery<Report[]>({
     queryKey: ["result", page],
     queryFn: async () => {
       try {
-        const res = await api.get(`report?page=${page}`);
+        const res = await api.get(
+          `report?page=${page}${date ? "&date=" + moment(date).format("YYYY-MM-DD") : ""}`,
+        );
         if (res.status == 200) {
           setPagination(res.data?.pagination);
           return res.data.data;
@@ -80,7 +92,7 @@ export default function AnalyticPage() {
           All listing of students reports
         </p>
       </div>
-      <div className="flex justify-between">
+      <div className="flex gap-2 flex-wrap *:flex-grow">
         <Popover open={isShow}>
           <PopoverTrigger onClick={toggle} asChild>
             <Button
@@ -105,6 +117,7 @@ export default function AnalyticPage() {
               <Button
                 onClick={() => {
                   toggle();
+                  refetch();
                 }}
                 className="w-full"
               >
@@ -113,6 +126,15 @@ export default function AnalyticPage() {
             </div>
           </PopoverContent>
         </Popover>
+        {!!classrooms && (
+          <Select
+            placeholder="Classroom"
+            items={classrooms.map((classroom: any) => ({
+              name: classroom.name,
+              value: classroom.id,
+            }))}
+          />
+        )}
       </div>
       <div
         className=" rounded-lg md:border border-dashed border-slate-300 shadow-sm"

@@ -11,13 +11,14 @@ interface Props {
     name: string;
     value: string;
   }[];
+  placeholder?: string;
 }
 
-function Select({ items }: Props) {
+function Select({ items, placeholder = " " }: Props) {
   return (
     <SelectWrapper>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Theme" />
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
         {items.map((item, i) => (
