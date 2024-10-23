@@ -9,13 +9,13 @@ class Classroom extends Model
 {
     use HasFactory;
 
-    public function students()
-    {
-        return $this->hasMany(Student::class);
-    }
-
     public function teacher()
     {
         return $this->hasOne(Teacher::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
     }
 }

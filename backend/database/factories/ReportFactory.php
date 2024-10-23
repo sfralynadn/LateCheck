@@ -38,7 +38,6 @@ class ReportFactory extends Factory
                 'Nunggu Angkot',
                 'Kurang Enak Badan',
                 'Mandi Seabad'
-
             ]),
             'date' => Carbon::create($year, $month, fake()->numberBetween(1, 28))
         ];

@@ -14,13 +14,24 @@ class AuthResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $result = [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
-            'nip' => $this->nip,
-            'classroom' => new ClassroomResource($this->classroom),
+            "email" => $this->email,
+            "last_logged_in" => $this->last_logged_in,
+            "role" => $this->role,
+            "profile" => [
+                "name" => $this->profile->name,
+                "address" => $this->profile->address,
+                "classroom" => $this->profile->classroom,
+            ]
         ];
+
+        if ($this->role === 'TEACHER') {
+            $result['profile']['nip'] = $this->profile->nip;
+        } elseif ($this->role === 'STUDENT') {
+            $result['profile']['nis'] = $this->profile->nis;
+        }
+
+        return $result;
     }
 }

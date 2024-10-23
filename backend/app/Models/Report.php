@@ -9,12 +9,6 @@ class Report extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'student_id',
-        'description',
-        'date',
-    ];
-
     public function student()
     {
         return $this->belongsTo(Student::class);

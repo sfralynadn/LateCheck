@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Report;
-use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,12 +17,10 @@ class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'nis' => fake()->randomNumber(5),
             'name' => fake()->name(),
-            'gender' => fake()->randomElement(["W", "M"]),
-            'contact' => fake()->numerify("############"),
-            'classroom_id' => fake()->randomElement([1, 2, 3]),
+            'nis' => fake()->unique()->numerify('######'),
             'address' => fake()->address(),
+            'contact' => fake()->unique()->numerify('############'),
         ];
     }
 }
