@@ -1,11 +1,12 @@
 import { useAuthStore } from "@/stores/auth";
 import SignIn from "@/views/auth/login.vue";
 import ClassroomPage from "@/views/dashboard/classroom/index.vue";
-import NewReportPage from "@/views/dashboard/index.vue";
+import NewReportPage from "@/views/dashboard/report/new/index.vue";
 import MainPage from "@/views/dashboard/index.vue";
 import Dashboard from "@/views/dashboard/layout.vue";
 import ReportPage from "@/views/dashboard/report/index.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import ProfilePage from "@/views/dashboard/profile/index.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -42,6 +43,11 @@ const routes: RouteRecordRaw[] = [
         path: "classroom",
         component: ClassroomPage,
         name: "dashboard.classroom",
+      },
+      {
+        path: "profile",
+        component: ProfilePage,
+        name: "dashboard.profile",
       },
     ],
   },

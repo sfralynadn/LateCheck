@@ -2,8 +2,9 @@
 import { Toaster } from "vue-sonner";
 import { useAuthStore } from "@/stores/auth";
 import { onBeforeMount } from "vue";
+
 const auth = useAuthStore();
-onBeforeMount(() => auth.refetch());
+onBeforeMount(async () => await auth.refetch());
 </script>
 
 <template>

@@ -66,7 +66,7 @@ const links = [
   },
 ];
 const filteredLinks = computed(() =>
-  links.filter((link) => !link.hidden(auth.user as Auth)),
+  links.filter((link) => !link.hidden(auth.user as Auth))
 );
 </script>
 
