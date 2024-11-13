@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +29,11 @@ Route::group([
     Route::post('login', [AuthController::class, 'authenticate']);
     Route::get('me', [AuthController::class, 'getCurrentAuth']);
     Route::post('logout', [AuthController::class, 'logout']);
+});
+
+Route::group(['middleware' => 'api'], function () {
+    Route::get('student/search', [StudentController::class, 'search']);
+    Route::apiResource('classroom', ClassroomController::class);
 });
 
 Route::middleware(['jwt.verify'])->group(function () {
