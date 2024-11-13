@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 
 const queryClient = useQueryClient();
 const router = useRouter();
@@ -31,9 +32,10 @@ const data = ref({
   student_id: String(student.value?.id) || "",
   description: "",
 });
+
 const setSearchValue = debounce(
   (val: string) => (searchValue.value = val),
-  1000
+  1000,
 );
 const setStudent = (s: any) => {
   student.value = s;
@@ -45,20 +47,19 @@ const { data: students, isFetching: isLoading } = useQuery<Student[]>({
   queryKey: ["search-result", searchValue, classroomId],
   initialData: [],
   queryFn: async () => {
+    const params = new URLSearchParams();
+    if (searchValue.value.length > 0) params.append("name", searchValue.value);
+    if (classroomId.value && !isNaN(Number(classroomId.value)))
+      params.append("classroomId", classroomId.value);
     try {
-      const res = await api.get(
-        `student/search?name=${searchValue.value || ""}${
-          !isNaN(Number(classroomId.value))
-            ? "&classroomId=" + classroomId.value
-            : ""
-        }`
-      );
+      const res = await api.get(`student/search?${params.toString()}`);
       return res.data.data;
     } catch (err: any) {
       throw new Error(err.message);
     }
   },
 });
+
 const { data: classrooms } = useQuery<Classroom[]>({
   queryKey: ["classrooms"],
   queryFn: async () => {
@@ -69,6 +70,7 @@ const { data: classrooms } = useQuery<Classroom[]>({
     }
   },
 });
+
 const { mutate: submitReport, isPending } = useMutation({
   mutationFn: async (d: typeof data.value) => {
     try {
@@ -81,10 +83,12 @@ const { mutate: submitReport, isPending } = useMutation({
   onSuccess: async () => {
     await queryClient.invalidateQueries({ queryKey: ["reports"] });
     router.push({ name: "dashboard.report" });
+    toast.success("Report successfully created");
   },
 });
+
 watch(query, () => setSearchValue(query.value));
-watch(data, () => console.log("dataL", data.value), { deep: true });
+watch(data, () => console.log("data:", data.value), { deep: true });
 </script>
 <template>
   <div>
@@ -161,11 +165,7 @@ watch(data, () => console.log("dataL", data.value), { deep: true });
               </div>
             </div>
             <Select
-              @update:model-value="
-                () => {
-                  student = null;
-                }
-              "
+              @update:model-value="student = null"
               class="max-w-[20rem]"
               v-model="classroomId"
             >
