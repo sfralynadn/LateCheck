@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\ReportExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginationResource;
 use App\Http\Resources\ReportResource;
 use App\Models\Report;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -18,11 +22,7 @@ class ReportController extends Controller
         $this->report = $report;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-
-    public function index()
+    public function getReports()
     {
         $user = auth()->user();
         $from = request()->query('from');
@@ -31,7 +31,6 @@ class ReportController extends Controller
 
         $from = $from ? Carbon::parse($from)->startOfDay() : null;
         $to = $to ? Carbon::parse($to)->endOfDay() : null;
-
         $reports = $this->report
             ->with(['student.classroom'])->whereHas('student', function ($query) use ($user, $classroom) {
                 switch ($user->role) {
@@ -51,7 +50,18 @@ class ReportController extends Controller
                 $query->whereDate('date', '>=', $from);
             })->when($to, function ($query) use ($to) {
                 $query->whereDate('date', '<=', $to);
-            })->orderBy('date', 'DESC')
+            })->orderBy('date', 'DESC');
+
+        return $reports;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+
+    public function index()
+    {
+        $reports = $this->getReports()
             ->paginate(10);
 
         return response()->json([
@@ -114,5 +124,16 @@ class ReportController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function export()
+    {
+        $reports = $this->getReports()->get();
+        $filePath = 'exports/' . \Illuminate\Support\Str::uuid() . '-reports.xlsx';
+        Excel::store(new ReportExport($reports), $filePath, 'local', \Maatwebsite\Excel\Excel::XLSX);
+        if (Storage::exists($filePath)) {
+            return response()->file(storage_path('app/' . $filePath))->deleteFileAfterSend(true);
+        }
+        return response()->json(['message' => 'File tidak ditemukan'], 404);
     }
 }

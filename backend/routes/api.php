@@ -36,6 +36,7 @@ Route::group(['middleware' => 'api'], function () {
     Route::apiResource('classroom', ClassroomController::class);
 });
 
+Route::get('/report/export', [ReportController::class, 'export']);
 Route::middleware(['jwt.verify'])->group(function () {
     Route::apiResource('report', ReportController::class);
 });
