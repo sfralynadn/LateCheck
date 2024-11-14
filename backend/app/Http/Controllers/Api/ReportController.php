@@ -6,12 +6,16 @@ use App\Exports\ReportExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginationResource;
 use App\Http\Resources\ReportResource;
+use App\Imports\ReportImport;
 use App\Models\Report;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Excel as ExcelExcel;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpParser\Node\Stmt\TryCatch;
 
 class ReportController extends Controller
 {
@@ -135,5 +139,32 @@ class ReportController extends Controller
             return response()->file(storage_path('app/' . $filePath))->deleteFileAfterSend(true);
         }
         return response()->json(['message' => 'File tidak ditemukan'], 404);
+    }
+
+    public function import()
+    {
+        $validator = Validator::make(request()->all(), [
+            'file' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'validation error',
+                'errors' => $validator->messages()
+            ], 422);
+        }
+
+        $file = request()->file('file');
+
+        try {
+            Excel::import(new ReportImport, $file);
+            return response()->json([
+                'message' => 'success import data'
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }
