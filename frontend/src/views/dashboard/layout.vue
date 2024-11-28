@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import api from "@/lib/api/api";
 import { useAuthStore } from "@/stores/auth";
 import { Auth } from "@/types/auth";
+import { useMutation } from "@tanstack/vue-query";
 import {
   Bell,
   CircleUser,
@@ -23,7 +25,8 @@ import {
   UserCircle,
 } from "lucide-vue-next";
 import { computed } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
+const router = useRouter();
 const auth = useAuthStore();
 const links = [
   {
@@ -65,9 +68,28 @@ const links = [
     icon: Shapes,
   },
 ];
-const filteredLinks = computed(() =>
-  links.filter((link) => !link.hidden(auth.user as Auth))
-);
+
+const { mutate: logout, isPending } = useMutation({
+  mutationFn: async () => {
+    try {
+      const res = await api.post("auth/logout");
+      return res.data;
+    } catch (err: any) {
+      return void 0;
+    }
+  },
+  onSuccess: async () => {
+    await auth.refetch();
+    router.push({ name: "auth.login" });
+  },
+  onError: () => void 0,
+});
+
+const filteredLinks = computed(() => {
+  if (auth.isAuthenticated) {
+    return links.filter((link) => !link.hidden(auth?.user as Auth));
+  } else return links;
+});
 </script>
 
 <template>
@@ -152,8 +174,8 @@ const filteredLinks = computed(() =>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              <h1>{{ auth?.user?.profile.name }}</h1>
+            <DropdownMenuLabel v-if="auth.isAuthenticated">
+              <h1>{{ auth?.user?.profile?.name }}</h1>
               <p class="font-normal text-slate-600">
                 {{
                   auth?.user?.role?.charAt(0) +
@@ -165,7 +187,7 @@ const filteredLinks = computed(() =>
             <!-- <DropdownMenuItem>Settings</DropdownMenuItem> -->
             <!-- <DropdownMenuItem>Support</DropdownMenuItem> -->
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem @click="logout">Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </header>

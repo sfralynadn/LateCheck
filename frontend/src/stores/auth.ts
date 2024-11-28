@@ -38,7 +38,7 @@ export const useAuthStore = defineStore("auth", {
                 resolve(true);
                 unwatch();
               }
-            }
+            },
           );
         }
       });

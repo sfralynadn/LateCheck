@@ -8,7 +8,7 @@ onBeforeMount(async () => await auth.refetch());
 </script>
 
 <template>
-  <RouterView v-if="!auth.isLoading" />
+  <RouterView />
   <Toaster
     position="top-right"
     style="font-family: Inter, sans-serif !important"
