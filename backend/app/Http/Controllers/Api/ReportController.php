@@ -26,7 +26,7 @@ class ReportController extends Controller
         $this->report = $report;
     }
 
-    public function getReports()
+    public function filteredReports()
     {
         $user = auth()->user();
         $from = request()->query('from');
@@ -65,8 +65,7 @@ class ReportController extends Controller
 
     public function index()
     {
-        $reports = $this->getReports()
-            ->paginate(10);
+        $reports = $this->filteredReports()->paginate(10);
 
         return response()->json([
             'message' => 'data successfully retrieved',
@@ -132,7 +131,7 @@ class ReportController extends Controller
 
     public function export()
     {
-        $reports = $this->getReports()->get();
+        $reports = $this->filteredReports()->get();
         $filePath = 'exports/' . \Illuminate\Support\Str::uuid() . '-reports.xlsx';
         Excel::store(new ReportExport($reports), $filePath, 'local', \Maatwebsite\Excel\Excel::XLSX);
         if (Storage::exists($filePath)) {
